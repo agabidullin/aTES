@@ -1,14 +1,9 @@
-# aTES
-[Ссылка на схему в Miro](https://miro.com/app/board/uXjVNtPkTMM=/?share_link_id=710319574736)
+# Kafka
+## Create topic
 
-## Сервисы
-- Task (создание задач, ассайн)
-- Accounting (калькуляция заработка)
-
-Не стал выделять сервис аналитики, так как по сути там ничего не происходит, данные запрашиваются из аккаунтинга
-
-## Коммуникации
-### Async
-* Task Created (Task -> Accounting) - при создании задачи (стриминг данных задачи)
-* Task Completed (Task -> Accounting) - при выполнении задачи 
-* Task Assigned (Task -> Accounting) - при назначении исполнителя на задачу
+curl \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Basic <KEY>" \
+  https://pkc-75m1o.europe-west3.gcp.confluent.cloud:443/kafka/v3/clusters/lkc-y6d7po/topics \
+  -d '{"topic_name":"<TOPIC_NAME>"}'
