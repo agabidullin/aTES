@@ -3,16 +3,29 @@ package main
 import (
 	"net/http"
 
+	"github.com/agabidullin/aTES/auth/config"
 	"github.com/agabidullin/aTES/auth/db"
 	"github.com/agabidullin/aTES/auth/handlers"
 	"github.com/agabidullin/aTES/auth/kafka"
 	"github.com/agabidullin/aTES/auth/oauth"
 
 	"github.com/go-chi/chi"
+
+	"github.com/joho/godotenv"
 )
 
+// init is invoked before main()
+func init() {
+	// loads values from .env into the system
+	if err := godotenv.Load(); err != nil {
+		panic("No .env file found")
+	}
+}
+
 func main() {
-	database := db.Init()
+	conf := config.New()
+
+	database := db.Init(conf.DSN)
 
 	oauth.Init(database)
 

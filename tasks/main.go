@@ -4,20 +4,31 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/agabidullin/aTES/tasks/config"
 	"github.com/agabidullin/aTES/tasks/db"
 	"github.com/agabidullin/aTES/tasks/kafka"
 	"github.com/agabidullin/aTES/tasks/oauth"
 	"github.com/agabidullin/aTES/tasks/router"
+	"github.com/joho/godotenv"
 
 	log "github.com/go-pkgz/lgr"
 )
 
+// init is invoked before main()
+func init() {
+	// loads values from .env into the system
+	if err := godotenv.Load(); err != nil {
+		panic("No .env file found")
+	}
+}
+
 func main() {
-	database := db.Init()
+	conf := config.New()
+	database := db.Init(conf.DSN)
 	service := oauth.Init()
 
 	// setup http server
-	router := router.Init(service)
+	router := router.Init(service, database)
 	kafkaHandlers := kafka.KafkaHandlers{DB: database}
 
 	go kafka.Init(kafkaHandlers.InitHandler)

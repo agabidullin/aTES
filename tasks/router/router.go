@@ -7,16 +7,18 @@ import (
 	"strings"
 	"time"
 
+	"github.com/agabidullin/aTES/tasks/handlers"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-pkgz/auth"
 	"github.com/go-pkgz/auth/token"
 	"github.com/go-pkgz/rest"
 	"github.com/go-pkgz/rest/logger"
+	"gorm.io/gorm"
 
 	log "github.com/go-pkgz/lgr"
 )
 
-func Init(service *auth.Service) *chi.Mux {
+func Init(service *auth.Service, database *gorm.DB) *chi.Mux {
 	// setup http server
 	router := chi.NewRouter()
 	m := service.Middleware()
@@ -25,6 +27,14 @@ func Init(service *auth.Service) *chi.Mux {
 	router.Group(func(r chi.Router) {
 		r.Use(m.Auth)
 		r.Get("/private_data", protectedDataHandler) // protected api
+	})
+
+	taskHandler := handlers.TasksHandler{DB: database}
+	router.Route("/tasks", func(r chi.Router) {
+		r.Use(m.Auth)
+		r.Post("/", taskHandler.CreateTask)                // POST /tasks
+		r.Post("/shuffle", taskHandler.Shuffle)            // POST /tasks/shuffle
+		r.Post("/{id}/complete", taskHandler.CompleteTask) // POST /tasks/1/complete
 	})
 
 	// static files under ~/
