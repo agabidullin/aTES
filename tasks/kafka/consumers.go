@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	messages "github.com/agabidullin/aTES/common/messages"
-	topics "github.com/agabidullin/aTES/common/topics"
+	"github.com/agabidullin/aTES/common/events"
+	"github.com/agabidullin/aTES/common/topics"
 	"github.com/agabidullin/aTES/tasks/model"
 
 	"gorm.io/gorm"
@@ -19,23 +19,26 @@ func (h *KafkaHandlers) InitHandler(topic string, key string, value string) {
 	fmt.Printf("Consumed event from topic %s: key = %-10s value = %s\n",
 		topic, key, value)
 	switch topic {
+	case topics.AccountsStream:
+		switch key {
+		case events.AccountCreated:
+			{
+				h.handleAccountCreated(value)
+			}
+		}
 	case topics.Accounts:
 		switch key {
-		case messages.RegisterAccountKey:
+		case events.RoleChanged:
 			{
-				h.handleRegisterAccount(value)
-			}
-		case messages.ChangeRoleKey:
-			{
-				h.handleChangeRole(value)
+				h.handleRoleChanged(value)
 			}
 		}
 
 	}
 }
 
-func (h *KafkaHandlers) handleRegisterAccount(value string) {
-	message := messages.RegisterAccount{}
+func (h *KafkaHandlers) handleAccountCreated(value string) {
+	message := events.AccountCreatedPayload{}
 	err := json.Unmarshal([]byte(value), &message)
 	if err == nil {
 		account := &model.Account{PublicId: message.PublicId, Name: message.Name, Role: message.Role}
@@ -43,8 +46,8 @@ func (h *KafkaHandlers) handleRegisterAccount(value string) {
 	}
 }
 
-func (h *KafkaHandlers) handleChangeRole(value string) {
-	message := messages.ChangeRole{}
+func (h *KafkaHandlers) handleRoleChanged(value string) {
+	message := events.RoleChangedPayload{}
 	err := json.Unmarshal([]byte(value), &message)
 	if err == nil {
 		h.DB.Model(&model.Account{}).Where("public_id = ?", message.PublicId).Update("role", message.Role)

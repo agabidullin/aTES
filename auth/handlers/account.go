@@ -10,8 +10,8 @@ import (
 	"github.com/go-chi/render"
 	"gorm.io/gorm"
 
-	messages "github.com/agabidullin/aTES/common/messages"
-	topics "github.com/agabidullin/aTES/common/topics"
+	"github.com/agabidullin/aTES/common/events"
+	"github.com/agabidullin/aTES/common/topics"
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
@@ -46,14 +46,14 @@ func (h AccountHandler) RegisterAccount(w http.ResponseWriter, r *http.Request) 
 
 	account := data.Account
 	h.DB.Create(account)
-	topic := topics.Accounts
+	topic := topics.AccountsStream
 
-	message := messages.RegisterAccount{PublicId: account.ID, Name: account.Name, Role: account.Role}
+	message := events.AccountCreatedPayload{PublicId: account.ID, Name: account.Name, Role: account.Role}
 	ser, _ := json.Marshal(&message)
 
 	h.Producer.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-		Key:            []byte(messages.RegisterAccountKey),
+		Key:            []byte(events.AccountCreated),
 		Value:          []byte(ser),
 	}, nil)
 
@@ -92,12 +92,12 @@ func (h AccountHandler) ChangeRole(w http.ResponseWriter, r *http.Request) {
 
 	topic := topics.Accounts
 
-	message := messages.ChangeRole{PublicId: account.ID, Role: account.Role}
+	message := events.RoleChangedPayload{PublicId: account.ID, Role: account.Role}
 	ser, _ := json.Marshal(&message)
 
 	h.Producer.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-		Key:            []byte(messages.ChangeRoleKey),
+		Key:            []byte(events.RoleChanged),
 		Value:          []byte(ser),
 	}, nil)
 

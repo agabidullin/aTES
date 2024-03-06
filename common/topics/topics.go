@@ -1,5 +1,6 @@
 package topics
 
 const (
-	Accounts = "accounts"
+	Accounts       = "accounts"
+	AccountsStream = "accounts-stream"
 )
