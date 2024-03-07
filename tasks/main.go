@@ -27,11 +27,15 @@ func main() {
 	database := db.Init(conf.DSN)
 	service := oauth.Init()
 
-	// setup http server
-	router := router.Init(service, database)
 	kafkaHandlers := kafka.KafkaHandlers{DB: database}
 
-	go kafka.Init(kafkaHandlers.InitHandler)
+	go kafka.InitConsumer(kafkaHandlers.InitHandler)
+
+	producer := kafka.InitProducer()
+	defer producer.Close()
+
+	// setup http server
+	router := router.Init(service, database, producer)
 
 	httpServer := &http.Server{
 		Addr:              ":8082",

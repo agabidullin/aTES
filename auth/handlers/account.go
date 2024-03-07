@@ -46,8 +46,15 @@ func (h AccountHandler) RegisterAccount(w http.ResponseWriter, r *http.Request) 
 
 	account := data.Account
 	h.DB.Create(account)
-	topic := topics.AccountsStream
 
+	h.produceAccountCreatedEvent(account)
+
+	render.Status(r, http.StatusCreated)
+	render.Render(w, r, &RegisterAccountResponse{Account: account})
+}
+
+func (h AccountHandler) produceAccountCreatedEvent(account *model.Account) {
+	topic := topics.AccountsStream
 	message := events.AccountCreatedPayload{PublicId: account.ID, Name: account.Name, Role: account.Role}
 	ser, _ := json.Marshal(&message)
 
@@ -56,9 +63,6 @@ func (h AccountHandler) RegisterAccount(w http.ResponseWriter, r *http.Request) 
 		Key:            []byte(events.AccountCreated),
 		Value:          []byte(ser),
 	}, nil)
-
-	render.Status(r, http.StatusCreated)
-	render.Render(w, r, &RegisterAccountResponse{Account: account})
 }
 
 type ChangeRoleRequest struct {
@@ -90,6 +94,13 @@ func (h AccountHandler) ChangeRole(w http.ResponseWriter, r *http.Request) {
 	h.DB.First(&account, data.ID)
 	h.DB.Model(&account).Update("Role", data.Role)
 
+	h.produceRoleChangedEvent(&account)
+
+	render.Status(r, http.StatusCreated)
+	render.Render(w, r, &RegisterAccountResponse{Account: &account})
+}
+
+func (h AccountHandler) produceRoleChangedEvent(account *model.Account) {
 	topic := topics.Accounts
 
 	message := events.RoleChangedPayload{PublicId: account.ID, Role: account.Role}
@@ -100,7 +111,4 @@ func (h AccountHandler) ChangeRole(w http.ResponseWriter, r *http.Request) {
 		Key:            []byte(events.RoleChanged),
 		Value:          []byte(ser),
 	}, nil)
-
-	render.Status(r, http.StatusCreated)
-	render.Render(w, r, &RegisterAccountResponse{Account: &account})
 }

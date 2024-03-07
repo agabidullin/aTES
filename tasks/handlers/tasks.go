@@ -6,17 +6,22 @@ import (
 	"math/rand"
 	"net/http"
 
+	"github.com/agabidullin/aTES/common/events"
+	"github.com/agabidullin/aTES/common/topics"
 	"github.com/agabidullin/aTES/tasks/model"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/go-chi/chi/v5"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
 type TasksHandler struct {
-	DB *gorm.DB
+	DB       *gorm.DB
+	Producer *kafka.Producer
 }
 
 type TaskCreateInput struct {
+	Title       string
 	Description string
 	AssigneeId  uint
 }
@@ -29,13 +34,41 @@ func (h TasksHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	task := &model.Task{Description: input.Description, AssigneeId: input.AssigneeId}
+	task := &model.Task{Title: input.Title, Description: input.Description, AssigneeId: input.AssigneeId}
 	h.DB.Omit(clause.Associations).Create(task)
 	err = json.NewEncoder(w).Encode(task)
+
+	h.produceTaskCreatedEvent(task)
+	h.produceTaskAssignedEvent(task)
+
 	if err != nil {
 		http.Error(w, "Internal error", http.StatusInternalServerError)
 		return
 	}
+}
+
+func (h TasksHandler) produceTaskCreatedEvent(task *model.Task) {
+	topic := topics.TasksStream
+	message := events.TaskCreatedPayload{PublicId: task.ID, AssigneeId: task.AssigneeId, Title: task.Title, Description: task.Description}
+	ser, _ := json.Marshal(&message)
+
+	h.Producer.Produce(&kafka.Message{
+		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+		Key:            []byte(events.TaskCreated),
+		Value:          []byte(ser),
+	}, nil)
+}
+
+func (h TasksHandler) produceTaskAssignedEvent(task *model.Task) {
+	topic := topics.TasksLifecycle
+	message := events.TaskAssignedPayload{PublicId: task.ID, AssigneeId: task.AssigneeId}
+	ser, _ := json.Marshal(&message)
+
+	h.Producer.Produce(&kafka.Message{
+		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+		Key:            []byte(events.TaskAssigned),
+		Value:          []byte(ser),
+	}, nil)
 }
 
 func (h TasksHandler) Shuffle(w http.ResponseWriter, r *http.Request) {
@@ -47,8 +80,12 @@ func (h TasksHandler) Shuffle(w http.ResponseWriter, r *http.Request) {
 		queryResult := h.DB.Where("role != ? AND role != ?", "admin", "manager").Find(&accountsToAssign)
 
 		for _, t := range openedTasks {
-			t.Assignee = accountsToAssign[rand.Intn(int(queryResult.RowsAffected))]
+			t.AssigneeId = accountsToAssign[rand.Intn(int(queryResult.RowsAffected))].PublicId
 			h.DB.Save(&t)
+		}
+
+		for _, t := range openedTasks {
+			h.produceTaskAssignedEvent(&t)
 		}
 
 		// return nil will commit the whole transaction
@@ -68,11 +105,23 @@ func (h TasksHandler) CompleteTask(w http.ResponseWriter, r *http.Request) {
 
 	task.IsClosed = true
 	h.DB.Save(&task)
-
+	h.produceTaskCompletedEvent(&task)
 	err := json.NewEncoder(w).Encode(task)
 
 	if err != nil {
 		http.Error(w, "Internal error", http.StatusInternalServerError)
 		return
 	}
+}
+
+func (h TasksHandler) produceTaskCompletedEvent(task *model.Task) {
+	topic := topics.TasksLifecycle
+	message := events.TaskCompletedPayload{PublicId: task.ID}
+	ser, _ := json.Marshal(&message)
+
+	h.Producer.Produce(&kafka.Message{
+		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+		Key:            []byte(events.TaskCompleted),
+		Value:          []byte(ser),
+	}, nil)
 }

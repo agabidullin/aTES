@@ -11,7 +11,31 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
-func Init(handler func(topic string, key string, value string)) {
+func InitProducer() *kafka.Producer {
+	// creates a new producer instance
+	conf := ReadConfig()
+	p, _ := kafka.NewProducer(&conf)
+
+	// go-routine to handle message delivery reports and
+	// possibly other event types (errors, stats, etc)
+	go func() {
+		for e := range p.Events() {
+			switch ev := e.(type) {
+			case *kafka.Message:
+				if ev.TopicPartition.Error != nil {
+					fmt.Printf("Failed to deliver message: %v\n", ev.TopicPartition)
+				} else {
+					fmt.Printf("Produced event to topic %s: key = %-10s value = %s\n",
+						*ev.TopicPartition.Topic, string(ev.Key), string(ev.Value))
+				}
+			}
+		}
+	}()
+
+	return p
+}
+
+func InitConsumer(handler func(topic string, key string, value string)) {
 	conf := ReadConfig()
 
 	// sets the consumer group ID and offset
@@ -20,7 +44,7 @@ func Init(handler func(topic string, key string, value string)) {
 
 	// creates a new consumer and subscribes to your topic
 	consumer, _ := kafka.NewConsumer(&conf)
-	consumer.SubscribeTopics([]string{topics.Accounts}, nil)
+	consumer.SubscribeTopics([]string{topics.Accounts, topics.AccountsStream}, nil)
 
 	run := true
 	for run {

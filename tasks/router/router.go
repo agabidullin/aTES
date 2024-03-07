@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/agabidullin/aTES/tasks/handlers"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-pkgz/auth"
 	"github.com/go-pkgz/auth/token"
@@ -18,7 +19,7 @@ import (
 	log "github.com/go-pkgz/lgr"
 )
 
-func Init(service *auth.Service, database *gorm.DB) *chi.Mux {
+func Init(service *auth.Service, database *gorm.DB, producer *kafka.Producer) *chi.Mux {
 	// setup http server
 	router := chi.NewRouter()
 	m := service.Middleware()
@@ -29,7 +30,7 @@ func Init(service *auth.Service, database *gorm.DB) *chi.Mux {
 		r.Get("/private_data", protectedDataHandler) // protected api
 	})
 
-	taskHandler := handlers.TasksHandler{DB: database}
+	taskHandler := handlers.TasksHandler{DB: database, Producer: producer}
 	router.Route("/tasks", func(r chi.Router) {
 		r.Use(m.Auth)
 		r.Post("/", taskHandler.CreateTask)                // POST /tasks
