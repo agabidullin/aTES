@@ -4,6 +4,7 @@ go 1.22.0
 
 require (
 	github.com/agabidullin/aTES/common v0.0.0
+	github.com/agabidullin/aTES/schemaregistry v0.0.0
 	github.com/go-pkgz/rest v1.18.2
 	golang.org/x/oauth2 v0.18.0
 	gorm.io/gorm v1.25.7-0.20240204074919-46816ad31dde
@@ -31,6 +32,9 @@ require (
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
+	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
+	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
+	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	go.etcd.io/bbolt v1.3.8 // indirect
 	go.mongodb.org/mongo-driver v1.13.1 // indirect
@@ -56,3 +60,4 @@ require (
 
 replace github.com/agabidullin/aTES/common => ../common
 
+replace github.com/agabidullin/aTES/schemaregistry => ../schemaregistry
