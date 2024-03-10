@@ -4,7 +4,7 @@ import "gorm.io/gorm"
 
 type Account struct {
 	gorm.Model
-	PublicId uint
+	PublicId uint `gorm:"unique"`
 	Name     string
 	Role     string
 	Balance  int

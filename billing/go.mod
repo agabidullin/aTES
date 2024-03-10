@@ -1,13 +1,11 @@
-module github.com/agabidullin/aTES/tasks
+module github.com/agabidullin/aTES/billing
 
 go 1.22.0
 
 require (
-	github.com/agabidullin/aTES/common v0.0.0
-	github.com/confluentinc/confluent-kafka-go/v2 v2.3.0
-	github.com/go-pkgz/lgr v0.11.1
 	github.com/go-pkgz/rest v1.18.2
-	golang.org/x/oauth2 v0.15.0
+	golang.org/x/oauth2 v0.18.0
+	gorm.io/gorm v1.25.7-0.20240204074919-46816ad31dde
 )
 
 require (
@@ -18,7 +16,6 @@ require (
 	github.com/go-oauth2/oauth2/v4 v4.5.2 // indirect
 	github.com/go-pkgz/repeater v1.1.3 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -36,22 +33,21 @@ require (
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	go.etcd.io/bbolt v1.3.8 // indirect
 	go.mongodb.org/mongo-driver v1.13.1 // indirect
+	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/image v0.14.0 // indirect
 	golang.org/x/sync v0.5.0 // indirect
-	google.golang.org/appengine v1.6.8 // indirect
+	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 )
 
 require (
 	github.com/go-chi/chi/v5 v5.0.12
 	github.com/go-pkgz/auth v1.22.1
+	github.com/go-pkgz/lgr v0.11.1
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/joho/godotenv v1.5.1
-	golang.org/x/crypto v0.17.0 // indirect
-	golang.org/x/net v0.19.0 // indirect
-	golang.org/x/sys v0.15.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/net v0.22.0 // indirect
+	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gorm.io/driver/postgres v1.5.6
-	gorm.io/gorm v1.25.7
 )
-
-replace github.com/agabidullin/aTES/common => ../common

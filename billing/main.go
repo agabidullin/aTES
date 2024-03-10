@@ -4,11 +4,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/agabidullin/aTES/tasks/config"
-	"github.com/agabidullin/aTES/tasks/db"
-	"github.com/agabidullin/aTES/tasks/kafka"
-	"github.com/agabidullin/aTES/tasks/oauth"
-	"github.com/agabidullin/aTES/tasks/router"
+	"github.com/agabidullin/aTES/billing/config"
+	"github.com/agabidullin/aTES/billing/db"
+	"github.com/agabidullin/aTES/billing/oauth"
+	"github.com/agabidullin/aTES/billing/router"
 	"github.com/joho/godotenv"
 
 	log "github.com/go-pkgz/lgr"
@@ -27,18 +26,11 @@ func main() {
 	database := db.Init(conf.DSN)
 	service := oauth.Init()
 
-	kafkaHandlers := kafka.KafkaHandlers{DB: database}
-
-	go kafka.InitConsumer(kafkaHandlers.InitHandler)
-
-	producer := kafka.InitProducer()
-	defer producer.Close()
-
 	// setup http server
-	router := router.Init(service, database, producer)
+	router := router.Init(service, database)
 
 	httpServer := &http.Server{
-		Addr:              ":8082",
+		Addr:              ":8083",
 		ReadHeaderTimeout: 5 * time.Second,
 		Handler:           router,
 	}
