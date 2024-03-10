@@ -3,6 +3,7 @@ module github.com/agabidullin/aTES/billing
 go 1.22.0
 
 require (
+	github.com/agabidullin/aTES/common v0.0.0
 	github.com/go-pkgz/rest v1.18.2
 	golang.org/x/oauth2 v0.18.0
 	gorm.io/gorm v1.25.7-0.20240204074919-46816ad31dde
@@ -41,6 +42,7 @@ require (
 )
 
 require (
+	github.com/confluentinc/confluent-kafka-go/v2 v2.3.0
 	github.com/go-chi/chi/v5 v5.0.12
 	github.com/go-pkgz/auth v1.22.1
 	github.com/go-pkgz/lgr v0.11.1
@@ -51,3 +53,6 @@ require (
 	google.golang.org/protobuf v1.31.0 // indirect
 	gorm.io/driver/postgres v1.5.6
 )
+
+replace github.com/agabidullin/aTES/common => ../common
+
