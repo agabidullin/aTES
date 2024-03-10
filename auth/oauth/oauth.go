@@ -55,6 +55,14 @@ func initGoauth2Srv(db *gorm.DB) *goauth2.Server {
 	if err != nil {
 		log.Printf("failed to set up a client store for go-oauth2/oauth2 server, %s", err)
 	}
+	err = clientStore.Set("cid1", &models.Client{
+		ID:     "cid1",
+		Secret: "csecret1",
+		Domain: "http://localhost:8083",
+	})
+	if err != nil {
+		log.Printf("failed to set up a client store for go-oauth2/oauth2 server, %s", err)
+	}
 	manager.MapClientStorage(clientStore)
 
 	srv := goauth2.NewServer(goauth2.NewConfig(), manager)
