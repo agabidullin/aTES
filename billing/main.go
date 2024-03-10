@@ -6,6 +6,7 @@ import (
 
 	"github.com/agabidullin/aTES/billing/config"
 	"github.com/agabidullin/aTES/billing/db"
+	"github.com/agabidullin/aTES/billing/kafka"
 	"github.com/agabidullin/aTES/billing/oauth"
 	"github.com/agabidullin/aTES/billing/router"
 	"github.com/joho/godotenv"
@@ -28,6 +29,10 @@ func main() {
 
 	// setup http server
 	router := router.Init(service, database)
+
+	kafkaHandlers := kafka.KafkaHandlers{DB: database}
+
+	go kafka.InitConsumer(kafkaHandlers.InitHandler)
 
 	httpServer := &http.Server{
 		Addr:              ":8083",

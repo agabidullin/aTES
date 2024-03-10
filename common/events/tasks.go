@@ -1,8 +1,13 @@
 package events
 
+type Event struct {
+	Version int
+}
+
 const TaskCreated = "task_created"
 
 type TaskCreatedPayload struct {
+	*Event
 	PublicId    uint
 	Title       string
 	Description string
@@ -19,5 +24,6 @@ type TaskAssignedPayload struct {
 const TaskCompleted = "task_completed"
 
 type TaskCompletedPayload struct {
-	PublicId uint
+	PublicId   uint
+	AssigneeId uint
 }

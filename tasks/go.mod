@@ -4,6 +4,7 @@ go 1.22.0
 
 require (
 	github.com/agabidullin/aTES/common v0.0.0
+	github.com/agabidullin/aTES/schemaregistry v0.0.0
 	github.com/confluentinc/confluent-kafka-go/v2 v2.3.0
 	github.com/go-pkgz/lgr v0.11.1
 	github.com/go-pkgz/rest v1.18.2
@@ -21,6 +22,8 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
+	github.com/iancoleman/orderedmap v0.0.0-20190318233801-ac98e3ecb4b0 // indirect
+	github.com/invopop/jsonschema v0.7.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/pgx/v5 v5.4.3 // indirect
@@ -30,9 +33,13 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.26 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
 	github.com/nullrocks/identicon v0.0.0-20180626043057-7875f45b0022 // indirect
+	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
+	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
+	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
+	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	go.etcd.io/bbolt v1.3.8 // indirect
 	go.mongodb.org/mongo-driver v1.13.1 // indirect
@@ -55,3 +62,5 @@ require (
 )
 
 replace github.com/agabidullin/aTES/common => ../common
+
+replace github.com/agabidullin/aTES/schemaregistry => ../schemaregistry

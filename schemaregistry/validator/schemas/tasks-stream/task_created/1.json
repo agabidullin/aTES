@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "PublicId": {
+      "type": "integer"
+    },
+    "Title": {
+      "type": "string"
+    },
+    "Description": {
+      "type": "string"
+    },
+    "AssigneeId": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "PublicId",
+    "Title",
+    "Description",
+    "AssigneeId"
+  ]
+}

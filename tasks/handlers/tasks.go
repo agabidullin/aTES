@@ -3,11 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math/rand"
 	"net/http"
 
 	"github.com/agabidullin/aTES/common/events"
 	"github.com/agabidullin/aTES/common/topics"
+	"github.com/agabidullin/aTES/schemaregistry/validator"
 	"github.com/agabidullin/aTES/tasks/model"
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/go-chi/chi/v5"
@@ -49,13 +51,20 @@ func (h TasksHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 
 func (h TasksHandler) produceTaskCreatedEvent(task *model.Task) {
 	topic := topics.TasksStream
-	message := events.TaskCreatedPayload{PublicId: task.ID, AssigneeId: task.AssigneeId, Title: task.Title, Description: task.Description}
-	ser, _ := json.Marshal(&message)
+	event := events.TaskCreated
+	message := events.TaskCreatedPayload{Event: &events.Event{Version: 1}, PublicId: task.ID, AssigneeId: task.AssigneeId, Title: task.Title, Description: task.Description}
+
+	payload, err := validator.Validate(message, topic, event, 1)
+
+	if err != nil {
+		fmt.Print(err.Error())
+		return
+	}
 
 	h.Producer.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-		Key:            []byte(events.TaskCreated),
-		Value:          []byte(ser),
+		Key:            []byte(event),
+		Value:          payload,
 	}, nil)
 }
 
@@ -81,11 +90,8 @@ func (h TasksHandler) Shuffle(w http.ResponseWriter, r *http.Request) {
 
 		for _, t := range openedTasks {
 			t.AssigneeId = accountsToAssign[rand.Intn(int(queryResult.RowsAffected))].PublicId
-			h.DB.Save(&t)
-		}
-
-		for _, t := range openedTasks {
 			h.produceTaskAssignedEvent(&t)
+			h.DB.Save(&t)
 		}
 
 		// return nil will commit the whole transaction
@@ -116,7 +122,7 @@ func (h TasksHandler) CompleteTask(w http.ResponseWriter, r *http.Request) {
 
 func (h TasksHandler) produceTaskCompletedEvent(task *model.Task) {
 	topic := topics.TasksLifecycle
-	message := events.TaskCompletedPayload{PublicId: task.ID}
+	message := events.TaskCompletedPayload{PublicId: task.ID, AssigneeId: task.AssigneeId}
 	ser, _ := json.Marshal(&message)
 
 	h.Producer.Produce(&kafka.Message{
